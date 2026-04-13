@@ -77,3 +77,17 @@ exports.resetPassword = async (req, res) => {
 };
 
 exports.getMe = (req, res) => res.json({ user: req.user });
+
+exports.googleCallback = async (req, res) => {
+  try {
+    const user = req.user;
+    user.updateStreak();
+    await user.save();
+    const token = signAccess(user._id);
+    const refresh = signRefresh(user._id);
+    const redirectUrl = `${process.env.CLIENT_URL}/dashboard?token=${token}&refresh=${refresh}`;
+    res.redirect(redirectUrl);
+  } catch (e) {
+    res.redirect(`${process.env.CLIENT_URL}/login?error=Google+auth+failed`);
+  }
+};
