@@ -41,7 +41,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
   } catch (err) {
     return done(err, null);
   }
-  }
 }));
 } else {
   console.warn('Google OAuth credentials not configured - Google login disabled');
