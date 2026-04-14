@@ -109,7 +109,7 @@ exports.googleCallback = async (req, res) => {
     await user.save();
     const token = signAccess(user._id);
     const refresh = signRefresh(user._id);
-    res.redirect(`${clientUrl}/dashboard?token=${token}&refresh=${refresh}`);
+    res.redirect(`${clientUrl}/login?token=${token}&refresh=${refresh}`);
   } catch (e) {
     res.redirect(`${clientUrl}/login?error=Google+auth+failed`);
   }
