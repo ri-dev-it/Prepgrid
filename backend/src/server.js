@@ -7,7 +7,7 @@ const session = require('express-session');
 const passport = require('passport');
 const connectDB = require('./config/db');
 const { getMissingRequiredEnv, getSessionSecret, isGoogleAuthEnabled, isProduction } = require('./config/env');
-const { getClientUrl } = require('./config/urls');
+const { getApiUrl, getClientUrl } = require('./config/urls');
 
 require('./config/passport');
 
@@ -63,6 +63,13 @@ app.use('/api/', limiter);
 const aiLimiter = rateLimit({ windowMs: 60 * 1000, max: 10, message: 'AI rate limit: 10 req/min' });
 app.use('/api/interview', aiLimiter);
 app.use('/api/quiz/generate', aiLimiter);
+
+app.get('/', (_, res) => res.json({
+  name: 'PrepGrid API',
+  status: 'ok',
+  frontend: getClientUrl(),
+  health: `${getApiUrl()}/api/health`,
+}));
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/practice', require('./routes/practice'));
