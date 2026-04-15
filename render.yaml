@@ -12,11 +12,11 @@ services:
       - key: NODE_ENV
         value: production
       - key: API_URL
-        value: https://prepgrid-backend-gpxp.onrender.com
+        value: https://prepgrid-1-9bl2.onrender.com
       - key: CLIENT_URL
         value: https://prepgrid-kcpe.vercel.app
       - key: GOOGLE_REDIRECT_URI
-        value: https://prepgrid-backend-gpxp.onrender.com/api/auth/google/callback
+        value: https://prepgrid-1-9bl2.onrender.com/api/auth/google/callback
       - key: MONGO_URI
         sync: false
       - key: JWT_SECRET
