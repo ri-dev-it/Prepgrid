@@ -18,13 +18,16 @@
    - [MongoDB Atlas](#1-mongodb-atlas-free-512mb)
    - [Groq API Key](#2-groq-api-key-free-no-credit-card)
    - [Mailtrap Email](#3-mailtrap-email-free-1000-emailsmonth)
+   - [Google OAuth](#4-google-oauth-optional-free)
 9. [Deployment — Completely Free](#-deployment--completely-free)
-   - [Deploy Backend to Render](#step-1-deploy-backend-to-render-free)
-   - [Deploy Frontend to Vercel](#step-2-deploy-frontend-to-vercel-free)
+   - [Deploy Backend to Render](#step-2-deploy-backend-to-render-free)
+   - [Deploy Frontend to Vercel](#step-3-deploy-frontend-to-vercel-free)
 10. [Docker Setup (Optional)](#-docker-setup-optional)
 11. [API Reference](#-api-reference)
 12. [Free Tier Limits](#-free-tier-limits)
 13. [Troubleshooting](#-troubleshooting)
+
+---
 
 ---
 
@@ -72,6 +75,7 @@
 
 ### User System
 - ✅ Register / Login / Forgot Password with OTP via email
+- ✅ **Google OAuth login** (optional, can be enabled with GOOGLE_CLIENT_ID/SECRET)
 - ✅ JWT access token + refresh token (auto-refresh)
 - ✅ Dashboard: questions solved, interviews, avg score, weak areas
 - ✅ Daily streak tracker with longest streak record
@@ -86,6 +90,7 @@
 - ✅ Add / Edit / Delete questions from the bank
 - ✅ View all registered users and their activity
 - ✅ Platform analytics: top attempted questions, acceptance rates by topic
+- ✅ Health check endpoint at `/api/health`
 
 ---
 
@@ -175,7 +180,7 @@ To install Node.js: https://nodejs.org (choose LTS)
 ### Step 1 — Clone the repository
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/prepgrid.git
+git clone https://github.com/Akarshak51/Prepgrid.git
 cd prepgrid
 ```
 
@@ -215,8 +220,9 @@ npm run dev
 ```
 
 This runs:
-- **Backend** on http://localhost:5000
-- **Frontend** on http://localhost:5173
+- **Backend** on http://localhost:5000  /  https://prepgrid-1-9bl2.onrender.com
+- **Frontend** on http://localhost:5173 /  https://prepgrid-pold.vercel.app
+
 
 Or start them separately:
 
@@ -260,6 +266,17 @@ JWT_REFRESH_SECRET=another_64_char_random_string
 JWT_EXPIRES_IN=1h
 JWT_REFRESH_EXPIRES_IN=7d
 
+# ── Session Secret (for OAuth, optional) ────────────────────────
+# If not provided, JWT_SECRET will be used
+SESSION_SECRET=your_session_secret_here
+
+# ── Google OAuth (Optional — for Google login) ──────────────────
+# Leave empty to disable Google login
+# Get keys from: https://console.cloud.google.com/
+GOOGLE_CLIENT_ID=your_google_client_id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/google/callback
+
 # ── Groq AI (free — see setup guide below) ────────────────────────
 GROQ_API_KEY=gsk_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 GROQ_MODEL=llama3-8b-8192
@@ -272,7 +289,8 @@ MAIL_PASS=your_mailtrap_password
 MAIL_FROM=noreply@prepgrid.dev
 
 # ── Frontend URL (for CORS) ───────────────────────────────────────
-CLIENT_URL=http://localhost:5173
+CLIENT_URL=https://prepgrid-pold.vercel.app
+
 
 # ── Admin seed credentials ────────────────────────────────────────
 ADMIN_EMAIL=admin@prepgrid.dev
@@ -285,7 +303,7 @@ PISTON_URL=https://emkc.org/api/v2/piston
 Create `frontend/.env`:
 
 ```env
-VITE_API_URL=http://localhost:5000/api
+VITE_API_URL=https://prepgrid-1-9bl2.onrender.com
 ```
 
 ---
@@ -385,6 +403,31 @@ For OTP and welcome emails during development:
 
 ---
 
+### 4. Google OAuth (Optional, Free)
+
+Enable social login via Google. This is **optional** — users can always use email/password.
+
+1. Go to https://console.cloud.google.com
+2. Create a new project or select existing one
+3. Enable **Google+ API**
+4. Go to **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
+5. Select **Web application**
+6. Add authorized redirect URIs:
+   - For development: `http://localhost:5000/api/auth/google/callback`
+   - For production: `https://prepgrid-1-9bl2.onrender.com/api/auth/google/callback`
+7. Copy your **Client ID** and **Client Secret**
+8. Paste into `.env`:
+   ```env
+   GOOGLE_CLIENT_ID=your_client_id.apps.googleusercontent.com
+   GOOGLE_CLIENT_SECRET=your_client_secret
+   GOOGLE_REDIRECT_URI=http://localhost:5000/api/auth/google/callback
+   SESSION_SECRET=your_session_secret_or_jwt_secret
+   ```
+
+If `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are not set, Google login will be disabled (but the app will still work fine).
+
+---
+
 ## 🌐 Deployment — Completely Free
 
 ### Step 1: Push to GitHub
@@ -422,6 +465,7 @@ git push -u origin main
    | `JWT_REFRESH_SECRET` | another random 64-char string |
    | `JWT_EXPIRES_IN` | `1h` |
    | `JWT_REFRESH_EXPIRES_IN` | `7d` |
+   | `SESSION_SECRET` | optional, defaults to JWT_SECRET |
    | `GROQ_API_KEY` | your Groq API key |
    | `GROQ_MODEL` | `llama3-8b-8192` |
    | `MAIL_HOST` | your Mailtrap/Gmail host |
@@ -429,14 +473,17 @@ git push -u origin main
    | `MAIL_USER` | your mail user |
    | `MAIL_PASS` | your mail password |
    | `MAIL_FROM` | `noreply@prepgrid.dev` |
-   | `CLIENT_URL` | `https://prepgrid.vercel.app` (fill after Vercel deploy) |
+   | `CLIENT_URL` | `https://prepgrid-pold.vercel.app` (fill after Vercel deploy) |
    | `ADMIN_EMAIL` | `admin@prepgrid.dev` |
    | `ADMIN_PASSWORD` | `Admin@123456` |
    | `PISTON_URL` | `https://emkc.org/api/v2/piston` |
+   | `GOOGLE_CLIENT_ID` | **(Optional)** your Google OAuth Client ID |
+   | `GOOGLE_CLIENT_SECRET` | **(Optional)** your Google OAuth Client Secret |
+   | `GOOGLE_REDIRECT_URI` | `https://prepgrid-backend.onrender.com/api/auth/google/callback` |
 
 6. Click **"Create Web Service"**
 7. Wait for deploy (2–3 minutes)
-8. Your backend URL will be: `https://prepgrid-backend.onrender.com`
+8. Your backend URL will be: `https://prepgrid-1-9bl2.onrender.com`
 
 > ⚠️ **Render free tier** spins down after 15 minutes of inactivity. First request after idle takes ~30 seconds to wake up. This is normal for free tier.
 
@@ -463,12 +510,12 @@ MONGO_URI="your_atlas_uri" node backend/src/utils/seed.js
 
    | Key | Value |
    |-----|-------|
-   | `VITE_API_URL` | `https://prepgrid-backend.onrender.com/api` |
+   | `VITE_API_URL` | `https://prepgrid-1-9bl2.onrender.com/api` |
 
 6. Click **"Deploy"**
-7. Your frontend URL will be: `https://prepgrid.vercel.app`
+7. Your frontend URL will be: `https://prepgrid-pold.vercel.app`
 
-8. **Update CORS on Render:** Go back to Render → your backend service → Environment → update `CLIENT_URL` to `https://prepgrid.vercel.app`
+8. **Update CORS on Render:** Go back to Render → your backend service → Environment → update `CLIENT_URL` to `https://prepgrid-pold.vercel.app`
 
 ---
 
@@ -478,12 +525,16 @@ MONGO_URI="your_atlas_uri" node backend/src/utils/seed.js
 □ MongoDB Atlas cluster created and connection string copied
 □ Groq API key obtained (console.groq.com)
 □ Mailtrap/Gmail credentials set
+□ Google OAuth credentials obtained (optional - https://console.cloud.google.com)
 □ Backend deployed to Render with all env vars
 □ Backend URL noted (e.g. https://prepgrid-backend.onrender.com)
+□ Health check endpoint verified at: https://prepgrid-backend.onrender.com/api/health
 □ Frontend deployed to Vercel with VITE_API_URL set
 □ Render CLIENT_URL updated to Vercel URL
+□ If using Google OAuth, update GOOGLE_REDIRECT_URI on Render
 □ Database seeded (admin + 15 questions)
 □ Test register/login on live URL
+□ Test Google OAuth login (if enabled)
 □ Test code execution on live URL
 □ Test AI interview on live URL
 ```
@@ -526,6 +577,8 @@ POST   /api/auth/refresh           Refresh access token
 POST   /api/auth/forgot-password   Send OTP to email
 POST   /api/auth/reset-password    Reset with OTP
 GET    /api/auth/me                Get current user (requires auth)
+GET    /api/auth/google            Start Google OAuth flow (only if enabled)
+GET    /api/auth/google/callback   Google OAuth callback (only if enabled)
 ```
 
 ### Practice Routes (all require auth)
@@ -621,7 +674,14 @@ DELETE /api/admin/questions/:id      Soft delete question
 ### CORS errors in browser
 - Ensure `CLIENT_URL` in backend `.env` matches your frontend URL exactly (no trailing slash)
 - For local dev: `CLIENT_URL=http://localhost:5173`
-- For production: `CLIENT_URL=https://your-app.vercel.app`
+- For production: `CLIENT_URL=https://prepgrid-pold.vercel.app`
+
+### Google OAuth not working / "Google login is not configured"
+- Ensure both `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` are set in `.env`
+- Check the redirect URI matches exactly in Google Console settings
+- For local dev: `http://localhost:5000/api/auth/google/callback`
+- For production: `https://prepgrid-1-9bl2.onrender.com/api/auth/google/callback`
+- If not using Google OAuth, simply leave these variables empty — email/password auth will still work
 
 ### "Free tier limit reached"
 - Monthly limits reset on the 1st of each month
@@ -688,4 +748,4 @@ MIT License — free to use, modify, and deploy.
 
 ---
 
-**Built for DevFusion Hackathon 2024 · ⚡ PrepGrid**
+**Built for DevFusion Hackathon 2026 · ⚡ PrepGrid**
