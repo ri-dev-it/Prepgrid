@@ -14,7 +14,7 @@ services:
       - key: API_URL
         value: https://prepgrid-1-9bl2.onrender.com
       - key: CLIENT_URL
-        value: https://prepgrid-kcpe.vercel.app
+        value: https://prepgrid-pold.vercel.app
       - key: GOOGLE_REDIRECT_URI
         value: https://prepgrid-1-9bl2.onrender.com/api/auth/google/callback
       - key: MONGO_URI
